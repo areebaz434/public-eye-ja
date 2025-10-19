@@ -38,43 +38,42 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-green-500 to-green-600 flex flex-col items-center justify-center p-6">
       {/* Combined Logo and Login Card */}
-      <div className="bg-white rounded-3xl w-full max-w-md px-8 py-8 shadow-2xl">
+      <div className="bg-white rounded-3xl w-full max-w-md px-8 py-10 shadow-2xl">
         {/* Logo Section */}
-        <div className="flex flex-col items-center mb-6">
+        <div className="flex flex-col items-center mb-8">
           <img 
             src="/logo.png" 
             alt="Public Eye JM" 
-            className="h-10 w-auto mb-2"
+            className="h-20 w-auto mb-3"
           />
           <img 
             src="/name.png" 
             alt="Public Eye JM" 
-            className="h-7 w-auto"
+            className="h-8 w-auto"
           />
         </div>
 
         {/* Login Form */}
-        <div className="space-y-4">
+        <div className="space-y-6">
           <div>
-            <h1 className=" text-center text-2xl font-bold text-gray-900 mb-1">Log In</h1>
-            <p className="text-center text-gray-700 text-base">
-              Let's Build the <span className="font">Future</span> Together
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">Log In</h1>
+            <p className="text-gray-700 text-lg">
+              Let's Build the <span className="text-yellow-400 font-semibold">Future</span> Together
             </p>
           </div>
-          
 
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-2 rounded-lg text-sm">
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
               {error}
             </div>
           )}
 
-          <div className="space-y-4">
+          <div className="space-y-5">
             {/* Email Field */}
             <div>
-              <label className="block text-sm font-semibold text-gray-900 mb-2">
+              <label className="block text-base font-semibold text-gray-900 mb-3">
                 Email
               </label>
               <input
@@ -82,7 +81,7 @@ const Login = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 onKeyPress={handleKeyPress}
-                className="w-full px-4 py-3 bg-gray-50 border-0 rounded-xl text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-green-500 focus:bg-white transition-all"
+                className="w-full px-4 py-4 bg-gray-50 border-0 rounded-xl text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-green-500 focus:bg-white transition-all"
                 placeholder="Please enter your email address"
                 disabled={loading}
               />
@@ -90,7 +89,7 @@ const Login = () => {
 
             {/* Password Field */}
             <div>
-              <label className="block text-sm font-semibold text-gray-900 mb-2">
+              <label className="block text-base font-semibold text-gray-900 mb-3">
                 Password
               </label>
               <input
@@ -98,7 +97,7 @@ const Login = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 onKeyPress={handleKeyPress}
-                className="w-full px-4 py-3 bg-gray-50 border-0 rounded-xl text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-green-500 focus:bg-white transition-all"
+                className="w-full px-4 py-4 bg-gray-50 border-0 rounded-xl text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-green-500 focus:bg-white transition-all"
                 placeholder="Please enter your password"
                 disabled={loading}
               />
@@ -116,13 +115,13 @@ const Login = () => {
           <button
             onClick={handleLogin}
             disabled={loading}
-            className="w-full bg-yellow-400 hover:bg-yellow-500 disabled:bg-gray-300 text-gray-900 font-bold text-base py-3.5 rounded-full transition-all shadow-md hover:shadow-lg"
+            className="w-full bg-yellow-400 hover:bg-yellow-500 disabled:bg-gray-300 text-gray-900 font-bold text-lg py-4 rounded-full transition-all shadow-md hover:shadow-lg mt-6"
           >
             {loading ? 'Logging in...' : 'Log In'}
           </button>
 
           {/* Sign Up Link */}
-          <div className="text-center text-gray-700 text-sm">
+          <div className="text-center text-gray-700 mt-6">
             Don't have an account?{' '}
             <button className="text-gray-900 font-semibold hover:text-gray-700">
               Sign Up

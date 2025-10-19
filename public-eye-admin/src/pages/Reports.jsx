@@ -1,13 +1,14 @@
 import { Calendar, CheckCircle, Clock, Filter, MapPin, Search, User, X, XCircle } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import ReportCard from '../components/ReportCard';
-import api from '../services/api';
+import { getAllReports, updateReportStatus } from '../services/reportService';
 
 const Reports = () => {
   const [reports, setReports] = useState([]);
   const [filteredReports, setFilteredReports] = useState([]);
   const [selectedReport, setSelectedReport] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [updating, setUpdating] = useState(false);
   const [filters, setFilters] = useState({
     status: 'all',
     category: 'all',
@@ -25,9 +26,13 @@ const Reports = () => {
   const loadReports = async () => {
     setLoading(true);
     try {
-      const data = await api.getReports();
-      setReports(data);
-      setFilteredReports(data);
+      const result = await getAllReports();
+      if (result.success) {
+        setReports(result.reports);
+        setFilteredReports(result.reports);
+      } else {
+        console.error('Error loading reports:', result.error);
+      }
     } catch (error) {
       console.error('Error loading reports:', error);
     } finally {
@@ -49,9 +54,10 @@ const Reports = () => {
     if (filters.search) {
       const search = filters.search.toLowerCase();
       filtered = filtered.filter(r =>
-        r.id.toLowerCase().includes(search) ||
-        r.location.toLowerCase().includes(search) ||
-        r.submittedBy.toLowerCase().includes(search)
+        r.reportId?.toLowerCase().includes(search) ||
+        r.id?.toLowerCase().includes(search) ||
+        r.userEmail?.toLowerCase().includes(search) ||
+        r.description?.toLowerCase().includes(search)
       );
     }
 
@@ -67,16 +73,27 @@ const Reports = () => {
   };
 
   const handleStatusUpdate = async (reportId, newStatus) => {
+    if (!confirm(`Change status to "${newStatus}"?`)) return;
+
+    setUpdating(true);
     try {
-      await api.updateReportStatus(reportId, newStatus);
-      setReports(reports.map(r => 
-        r.id === reportId ? { ...r, status: newStatus } : r
-      ));
-      setSelectedReport(prev => 
-        prev && prev.id === reportId ? { ...prev, status: newStatus } : prev
-      );
+      const result = await updateReportStatus(reportId, newStatus);
+      if (result.success) {
+        // Update local state
+        setReports(reports.map(r => 
+          r.id === reportId ? { ...r, status: newStatus } : r
+        ));
+        setSelectedReport(prev => 
+          prev && prev.id === reportId ? { ...prev, status: newStatus } : prev
+        );
+      } else {
+        alert(`Error updating status: ${result.error}`);
+      }
     } catch (error) {
       console.error('Error updating status:', error);
+      alert('Failed to update status');
+    } finally {
+      setUpdating(false);
     }
   };
 
@@ -109,7 +126,7 @@ const Reports = () => {
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
             <input
               type="text"
-              placeholder="Search by ID, location, or submitter..."
+              placeholder="Search by ID, email, or description..."
               value={filters.search}
               onChange={(e) => handleFilterChange('search', e.target.value)}
               className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
@@ -124,7 +141,7 @@ const Reports = () => {
           >
             <option value="all">All Status</option>
             <option value="pending">Pending</option>
-            <option value="in-progress">In Progress</option>
+            <option value="approved">Approved</option>
             <option value="resolved">Resolved</option>
             <option value="rejected">Rejected</option>
           </select>
@@ -136,10 +153,12 @@ const Reports = () => {
             className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white"
           >
             <option value="all">All Categories</option>
-            <option value="Pothole">Pothole</option>
-            <option value="Broken Street Light">Broken Street Light</option>
-            <option value="Clogged Drain">Clogged Drain</option>
-            <option value="Damaged Road Sign">Damaged Road Sign</option>
+            <option value="pothole">Pothole</option>
+            <option value="street_light">Street Light</option>
+            <option value="drainage">Drainage</option>
+            <option value="garbage">Garbage</option>
+            <option value="road_sign">Road Sign</option>
+            <option value="other">Other</option>
           </select>
 
           {/* Clear Filters */}
@@ -202,7 +221,7 @@ const Reports = () => {
                 {/* Image */}
                 <div className="rounded-lg overflow-hidden">
                   <img
-                    src={selectedReport.image}
+                    src={selectedReport.imageUrl}
                     alt="Report"
                     className="w-full h-80 object-cover"
                   />
@@ -212,17 +231,19 @@ const Reports = () => {
                 <div className="flex items-center gap-3">
                   <span className={`px-4 py-2 rounded-lg text-sm font-semibold
                     ${selectedReport.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : ''}
-                    ${selectedReport.status === 'in-progress' ? 'bg-blue-100 text-blue-800' : ''}
-                    ${selectedReport.status === 'resolved' ? 'bg-green-100 text-green-800' : ''}
+                    ${selectedReport.status === 'approved' ? 'bg-green-100 text-green-800' : ''}
+                    ${selectedReport.status === 'resolved' ? 'bg-blue-100 text-blue-800' : ''}
                     ${selectedReport.status === 'rejected' ? 'bg-red-100 text-red-800' : ''}
                   `}>
-                    {selectedReport.status.replace('-', ' ').toUpperCase()}
+                    {selectedReport.status.toUpperCase()}
                   </span>
-                  <span className={`text-sm font-medium ${
-                    selectedReport.confidence >= 0.7 ? 'text-green-600' : 'text-yellow-600'
-                  }`}>
-                    {(selectedReport.confidence * 100).toFixed(0)}% AI Confidence
-                  </span>
+                  {selectedReport.aiConfidence && (
+                    <span className={`text-sm font-medium ${
+                      selectedReport.aiConfidence >= 0.7 ? 'text-green-600' : 'text-yellow-600'
+                    }`}>
+                      {(selectedReport.aiConfidence * 100).toFixed(0)}% AI Confidence
+                    </span>
+                  )}
                 </div>
 
                 {/* Details Grid */}
@@ -230,18 +251,24 @@ const Reports = () => {
                   <div className="space-y-4">
                     <div>
                       <p className="text-sm text-gray-600 mb-1">Report ID</p>
-                      <p className="text-lg font-semibold text-gray-900">{selectedReport.id}</p>
+                      <p className="text-sm font-semibold text-gray-900 font-mono">
+                        {selectedReport.reportId}
+                      </p>
                     </div>
                     <div>
                       <p className="text-sm text-gray-600 mb-1">Category</p>
-                      <p className="text-lg font-semibold text-gray-900">{selectedReport.category}</p>
+                      <p className="text-lg font-semibold text-gray-900 capitalize">
+                        {selectedReport.category.replace('_', ' ')}
+                      </p>
                     </div>
                     <div>
                       <p className="text-sm text-gray-600 mb-1">
                         <MapPin className="w-4 h-4 inline mr-1" />
                         Location
                       </p>
-                      <p className="text-gray-900">{selectedReport.location}</p>
+                      <p className="text-gray-900 text-sm font-mono">
+                        {selectedReport.location?.latitude.toFixed(6)}, {selectedReport.location?.longitude.toFixed(6)}
+                      </p>
                     </div>
                   </div>
 
@@ -251,7 +278,7 @@ const Reports = () => {
                         <User className="w-4 h-4 inline mr-1" />
                         Submitted By
                       </p>
-                      <p className="text-gray-900">{selectedReport.submittedBy}</p>
+                      <p className="text-gray-900">{selectedReport.userEmail}</p>
                     </div>
                     <div>
                       <p className="text-sm text-gray-600 mb-1">
@@ -259,12 +286,23 @@ const Reports = () => {
                         Submitted At
                       </p>
                       <p className="text-gray-900">
-                        {new Date(selectedReport.submittedAt).toLocaleString('en-US', {
+                        {selectedReport.timestamp ? new Date(selectedReport.timestamp).toLocaleString('en-US', {
                           dateStyle: 'long',
                           timeStyle: 'short'
-                        })}
+                        }) : 'N/A'}
                       </p>
                     </div>
+                    {selectedReport.updatedAt && (
+                      <div>
+                        <p className="text-sm text-gray-600 mb-1">Last Updated</p>
+                        <p className="text-gray-900 text-sm">
+                          {new Date(selectedReport.updatedAt.toDate()).toLocaleString('en-US', {
+                            dateStyle: 'medium',
+                            timeStyle: 'short'
+                          })}
+                        </p>
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -278,37 +316,61 @@ const Reports = () => {
                   </div>
                 )}
 
+                {/* AI Tags */}
+                {selectedReport.tags && selectedReport.tags.length > 0 && (
+                  <div>
+                    <p className="text-sm text-gray-600 mb-2">AI Detected Tags</p>
+                    <div className="flex flex-wrap gap-2">
+                      {selectedReport.tags.map((tag, idx) => (
+                        <span key={idx} className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm">
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Admin Notes */}
+                {selectedReport.adminNotes && (
+                  <div>
+                    <p className="text-sm text-gray-600 mb-2">Admin Notes</p>
+                    <p className="text-gray-900 bg-blue-50 p-4 rounded-lg">
+                      {selectedReport.adminNotes}
+                    </p>
+                  </div>
+                )}
+
                 {/* Action Buttons */}
                 <div className="pt-6 border-t border-gray-200">
                   <p className="text-sm font-semibold text-gray-700 mb-4">Update Status</p>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                     <button
                       onClick={() => handleStatusUpdate(selectedReport.id, 'pending')}
-                      disabled={selectedReport.status === 'pending'}
+                      disabled={updating || selectedReport.status === 'pending'}
                       className="px-4 py-3 bg-yellow-500 hover:bg-yellow-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-lg transition-colors flex items-center justify-center gap-2 font-medium"
                     >
                       <Clock className="w-4 h-4" />
                       Pending
                     </button>
                     <button
-                      onClick={() => handleStatusUpdate(selectedReport.id, 'in-progress')}
-                      disabled={selectedReport.status === 'in-progress'}
-                      className="px-4 py-3 bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-lg transition-colors flex items-center justify-center gap-2 font-medium"
+                      onClick={() => handleStatusUpdate(selectedReport.id, 'approved')}
+                      disabled={updating || selectedReport.status === 'approved'}
+                      className="px-4 py-3 bg-green-500 hover:bg-green-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-lg transition-colors flex items-center justify-center gap-2 font-medium"
                     >
-                      <Clock className="w-4 h-4" />
-                      In Progress
+                      <CheckCircle className="w-4 h-4" />
+                      Approve
                     </button>
                     <button
                       onClick={() => handleStatusUpdate(selectedReport.id, 'resolved')}
-                      disabled={selectedReport.status === 'resolved'}
-                      className="px-4 py-3 bg-green-500 hover:bg-green-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-lg transition-colors flex items-center justify-center gap-2 font-medium"
+                      disabled={updating || selectedReport.status === 'resolved'}
+                      className="px-4 py-3 bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-lg transition-colors flex items-center justify-center gap-2 font-medium"
                     >
                       <CheckCircle className="w-4 h-4" />
                       Resolved
                     </button>
                     <button
                       onClick={() => handleStatusUpdate(selectedReport.id, 'rejected')}
-                      disabled={selectedReport.status === 'rejected'}
+                      disabled={updating || selectedReport.status === 'rejected'}
                       className="px-4 py-3 bg-red-500 hover:bg-red-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-lg transition-colors flex items-center justify-center gap-2 font-medium"
                     >
                       <XCircle className="w-4 h-4" />

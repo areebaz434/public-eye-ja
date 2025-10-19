@@ -15,8 +15,8 @@ L.Icon.Default.mergeOptions({
 const getMarkerIcon = (status) => {
   const colors = {
     pending: '#eab308', // yellow
-    'in-progress': '#3b82f6', // blue
-    resolved: '#22c55e', // green
+    approved: '#22c55e', // green
+    resolved: '#3b82f6', // blue
     rejected: '#ef4444' // red
   };
 
@@ -59,8 +59,13 @@ const FitBounds = ({ reports }) => {
 
   useEffect(() => {
     if (reports.length > 0) {
-      const bounds = reports.map(r => r.coordinates);
-      map.fitBounds(bounds, { padding: [50, 50] });
+      const bounds = reports
+        .filter(r => r.location && r.location.latitude && r.location.longitude)
+        .map(r => [r.location.latitude, r.location.longitude]);
+      
+      if (bounds.length > 0) {
+        map.fitBounds(bounds, { padding: [50, 50] });
+      }
     }
   }, [reports, map]);
 
@@ -70,6 +75,18 @@ const FitBounds = ({ reports }) => {
 const MapView = ({ reports, onReportClick, selectedReport }) => {
   // Default center: Kingston, Jamaica
   const defaultCenter = [18.0179, -76.8099];
+
+  const getCategoryName = (category) => {
+    const names = {
+      pothole: 'Pothole',
+      street_light: 'Street Light',
+      drainage: 'Drainage',
+      garbage: 'Garbage',
+      road_sign: 'Road Sign',
+      other: 'Other'
+    };
+    return names[category] || category;
+  };
 
   return (
     <div className="h-full w-full relative">
@@ -86,49 +103,75 @@ const MapView = ({ reports, onReportClick, selectedReport }) => {
         
         {reports.length > 0 && <FitBounds reports={reports} />}
         
-        {reports.map((report) => (
-          <Marker
-            key={report.id}
-            position={report.coordinates}
-            icon={getMarkerIcon(report.status)}
-            eventHandlers={{
-              click: () => onReportClick && onReportClick(report)
-            }}
-          >
-            <Popup>
-              <div className="p-2 min-w-[200px]">
-                <h3 className="font-bold text-gray-900 mb-2">{report.id}</h3>
-                <div className="space-y-1 text-sm">
-                  <p className="text-gray-700">
-                    <span className="font-semibold">Category:</span> {report.category}
-                  </p>
-                  <p className="text-gray-700">
-                    <span className="font-semibold">Location:</span> {report.location}
-                  </p>
-                  <p className="text-gray-700">
-                    <span className="font-semibold">Status:</span>{' '}
-                    <span className={`
-                      px-2 py-1 rounded text-xs font-medium
-                      ${report.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : ''}
-                      ${report.status === 'in-progress' ? 'bg-blue-100 text-blue-800' : ''}
-                      ${report.status === 'resolved' ? 'bg-green-100 text-green-800' : ''}
-                      ${report.status === 'rejected' ? 'bg-red-100 text-red-800' : ''}
-                    `}>
-                      {report.status.replace('-', ' ')}
-                    </span>
-                  </p>
+        {reports.map((report) => {
+          // Skip reports without valid location data
+          if (!report.location || !report.location.latitude || !report.location.longitude) {
+            return null;
+          }
+
+          return (
+            <Marker
+              key={report.id}
+              position={[report.location.latitude, report.location.longitude]}
+              icon={getMarkerIcon(report.status)}
+              eventHandlers={{
+                click: () => onReportClick && onReportClick(report)
+              }}
+            >
+              <Popup>
+                <div className="p-2 min-w-[200px]">
+                  <h3 className="font-bold text-gray-900 mb-2 text-sm">
+                    {report.reportId}
+                  </h3>
+                  <div className="space-y-1 text-sm">
+                    <p className="text-gray-700">
+                      <span className="font-semibold">Category:</span> {getCategoryName(report.category)}
+                    </p>
+                    <p className="text-gray-700">
+                      <span className="font-semibold">Location:</span>
+                      <br />
+                      <span className="font-mono text-xs">
+                        {report.location.latitude.toFixed(6)}, {report.location.longitude.toFixed(6)}
+                      </span>
+                    </p>
+                    <p className="text-gray-700">
+                      <span className="font-semibold">Submitted by:</span>
+                      <br />
+                      <span className="text-xs">{report.userEmail}</span>
+                    </p>
+                    <p className="text-gray-700">
+                      <span className="font-semibold">Status:</span>{' '}
+                      <span className={`
+                        px-2 py-1 rounded text-xs font-medium
+                        ${report.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : ''}
+                        ${report.status === 'approved' ? 'bg-green-100 text-green-800' : ''}
+                        ${report.status === 'resolved' ? 'bg-blue-100 text-blue-800' : ''}
+                        ${report.status === 'rejected' ? 'bg-red-100 text-red-800' : ''}
+                      `}>
+                        {report.status}
+                      </span>
+                    </p>
+                    {report.aiConfidence !== undefined && (
+                      <p className="text-gray-700">
+                        <span className="font-semibold">AI Confidence:</span>{' '}
+                        <span className={report.aiConfidence >= 0.7 ? 'text-green-600' : 'text-yellow-600'}>
+                          {(report.aiConfidence * 100).toFixed(0)}%
+                        </span>
+                      </p>
+                    )}
+                  </div>
+                  {report.imageUrl && (
+                    <img
+                      src={report.imageUrl}
+                      alt="Report"
+                      className="w-full h-32 object-cover rounded mt-2"
+                    />
+                  )}
                 </div>
-                {report.image && (
-                  <img
-                    src={report.image}
-                    alt="Report"
-                    className="w-full h-32 object-cover rounded mt-2"
-                  />
-                )}
-              </div>
-            </Popup>
-          </Marker>
-        ))}
+              </Popup>
+            </Marker>
+          );
+        })}
       </MapContainer>
 
       {/* Map Legend */}
@@ -140,11 +183,11 @@ const MapView = ({ reports, onReportClick, selectedReport }) => {
             <span>Pending</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-blue-500"></div>
-            <span>In Progress</span>
+            <div className="w-3 h-3 rounded-full bg-green-500"></div>
+            <span>Approved</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-green-500"></div>
+            <div className="w-3 h-3 rounded-full bg-blue-500"></div>
             <span>Resolved</span>
           </div>
           <div className="flex items-center gap-2">
