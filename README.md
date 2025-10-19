@@ -29,3 +29,6 @@ Password: password123
 Note: Citizens can create their own accounts directly through the mobile app.
 Known Issues
 Image Upload Limitation: Due to network connectivity constraints during development, images captured from the mobile application may not display correctly on the government admin dashboard. The API connection times out before image data can be fully transmitted. The Google Cloud Vision API integration has been verified and functions correctly under stable network conditions. This issue is infrastructure-related and does not reflect a code defect.
+
+Please see the link for mobile demo video, as the submission is restricted to images only. 
+link: https://drive.google.com/file/d/1hPE7f-qTttK2_0uR3iHoBgk2PtiYlu4n/view?usp=drivesdk
