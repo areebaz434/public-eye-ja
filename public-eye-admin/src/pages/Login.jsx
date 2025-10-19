@@ -1,4 +1,3 @@
-import { Eye } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
@@ -39,51 +38,59 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-600 via-green-700 to-green-800 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
-        {/* Header */}
-        <div className="bg-gradient-to-r from-yellow-400 to-yellow-500 p-8 text-center">
-          <div className="inline-flex items-center justify-center w-20 h-20 bg-white rounded-full mb-4 shadow-lg">
-            <Eye className="w-10 h-10 text-green-600" />
-          </div>
-          <h1 className="text-3xl font-bold text-gray-900">
-            public<span className="text-green-600">eye</span>
-            <span className="text-yellow-700 text-2xl">JM</span>
-          </h1>
-          <p className="text-gray-800 font-medium mt-2">Admin Portal</p>
+    <div className="min-h-screen bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center p-4">
+      {/* Combined Logo and Login Card */}
+      <div className="bg-white rounded-3xl w-full max-w-md px-8 py-8 shadow-2xl">
+        {/* Logo Section */}
+        <div className="flex flex-col items-center mb-6">
+          <img 
+            src="/logo.png" 
+            alt="Public Eye JM" 
+            className="h-16 w-auto mb-2"
+          />
+          <img 
+            src="/name.png" 
+            alt="Public Eye JM" 
+            className="h-7 w-auto"
+          />
         </div>
 
-        {/* Form */}
-        <div className="p-8 space-y-6">
+        {/* Login Form */}
+        <div className="space-y-4">
           <div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Welcome Back</h2>
-            <p className="text-gray-600">Sign in to manage infrastructure reports</p>
+            <h1 className=" text-center text-2xl font-bold text-gray-900 mb-1">Log In</h1>
+            <p className="text-center text-gray-700 text-base">
+              Let's Build the <span className="font">Future</span> Together
+            </p>
           </div>
+          
 
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-2 rounded-lg text-sm">
               {error}
             </div>
           )}
 
           <div className="space-y-4">
+            {/* Email Field */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Email Address
+              <label className="block text-sm font-semibold text-gray-900 mb-2">
+                Email
               </label>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 onKeyPress={handleKeyPress}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
-                placeholder="admin@publiceye.jm"
+                className="w-full px-4 py-3 bg-gray-50 border-0 rounded-xl text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-green-500 focus:bg-white transition-all"
+                placeholder="Please enter your email address"
                 disabled={loading}
               />
             </div>
 
+            {/* Password Field */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-semibold text-gray-900 mb-2">
                 Password
               </label>
               <input
@@ -91,23 +98,35 @@ const Login = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 onKeyPress={handleKeyPress}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
-                placeholder="Enter your password"
+                className="w-full px-4 py-3 bg-gray-50 border-0 rounded-xl text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-green-500 focus:bg-white transition-all"
+                placeholder="Please enter your password"
                 disabled={loading}
               />
             </div>
+
+            {/* Forgot Password */}
+            <div className="flex justify-end">
+              <button className="text-gray-900 font-semibold text-sm hover:text-gray-700">
+                Forgot Password
+              </button>
+            </div>
           </div>
 
+          {/* Login Button */}
           <button
             onClick={handleLogin}
             disabled={loading}
-            className="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white font-semibold py-3 rounded-lg transition-colors shadow-md hover:shadow-lg"
+            className="w-full bg-yellow-400 hover:bg-yellow-500 disabled:bg-gray-300 text-gray-900 font-bold text-base py-3.5 rounded-full transition-all shadow-md hover:shadow-lg"
           >
-            {loading ? 'Signing in...' : 'Sign In'}
+            {loading ? 'Logging in...' : 'Log In'}
           </button>
 
-          <div className="text-center text-sm text-gray-600">
-            Having trouble? Contact your system administrator
+          {/* Sign Up Link */}
+          <div className="text-center text-gray-700 text-sm">
+            Don't have an account?{' '}
+            <button className="text-gray-900 font-semibold hover:text-gray-700">
+              Sign Up
+            </button>
           </div>
         </div>
       </div>

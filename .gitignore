@@ -65,3 +65,4 @@ app-example
 # Cache
 .cache/
 .parcel-cache/
+.vercel
