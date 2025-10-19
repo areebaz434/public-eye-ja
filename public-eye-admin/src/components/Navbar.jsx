@@ -23,19 +23,26 @@ const Navbar = ({ onMenuClick }) => {
               <Menu className="w-6 h-6 text-gray-700" />
             </button>
             
-            <div className="flex items-center gap-3">
+            <div className="flex items-center ">
               <img 
                 src="/logo.png" 
                 alt="Public Eye JA" 
-                className="h-10 w-10 object-contain"
+                className=" h-16 w-12 object-contain"
                 onError={(e) => {
                   // Fallback if logo not found
                   e.target.style.display = 'none';
                 }}
               />
               <h1 className="text-xl font-bold">
-                public<span className="text-green-600">eye</span>
-                <span className="text-yellow-500 text-lg">JM</span>
+                <img 
+                src="/name.png" 
+                alt="Public Eye JA" 
+                className="h-10 w-21 pt-2 object-contain"
+                onError={(e) => {
+                  // Fallback if logo not found
+                  e.target.style.display = 'none';
+                }}
+              />
               </h1>
             </div>
           </div>
