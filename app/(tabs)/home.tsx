@@ -581,17 +581,6 @@ const styles = StyleSheet.create({
     flex: 2,
     borderRadius: 24,
     overflow: "hidden",
-    ...Platform.select({
-      ios: {
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 8 },
-        shadowOpacity: 0.2,
-        shadowRadius: 16,
-      },
-      android: {
-        elevation: 12,
-      },
-    }),
   },
   statGradient: {
     padding: 24,
@@ -628,17 +617,6 @@ const styles = StyleSheet.create({
     padding: 16,
     borderRadius: 16,
     justifyContent: "center",
-    ...Platform.select({
-      ios: {
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.15,
-        shadowRadius: 8,
-      },
-      android: {
-        elevation: 6,
-      },
-    }),
   },
   statNumberSmall: {
     fontSize: 28,

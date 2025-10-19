@@ -3,7 +3,16 @@
 // ============================================
 import { useRouter } from "expo-router";
 import {
-  Image,
+  BarChart3,
+  Bell,
+  HelpCircle,
+  Info,
+  LogOut,
+  Settings,
+  Star,
+  User
+} from "lucide-react-native";
+import {
   Modal,
   ScrollView,
   StyleSheet,
@@ -12,7 +21,6 @@ import {
   View,
 } from "react-native";
 import { COLORS } from "../constants/colors";
-import { IMAGES } from "../constants/images";
 import { MockAuth } from "../services/mockAuth";
 
 interface SidebarProps {
@@ -37,38 +45,38 @@ export default function Sidebar({ visible, onClose }: SidebarProps) {
 
   const menuItems = [
     {
-      icon: "👤",
+      icon: User,
       label: "Profile",
       route: "/profile",
       color: COLORS.primary,
     },
     {
-      icon: "📊",
+      icon: BarChart3,
       label: "My Stats",
       route: "/stats",
       color: COLORS.status.inProgress,
     },
     {
-      icon: "🔔",
+      icon: Bell,
       label: "Notifications",
       route: "/notifications",
       color: COLORS.secondary,
       badge: "3",
     },
     {
-      icon: "⚙️",
+      icon: Settings,
       label: "Settings",
       route: "/settings",
       color: COLORS.gray.dark,
     },
     {
-      icon: "❓",
+      icon: HelpCircle,
       label: "Help & FAQ",
       route: "/help",
       color: COLORS.status.inProgress,
     },
     {
-      icon: "ℹ️",
+      icon: Info,
       label: "About Public Eye JA",
       route: "/about",
       color: COLORS.primary,
@@ -93,7 +101,7 @@ export default function Sidebar({ visible, onClose }: SidebarProps) {
           {/* Profile Section */}
           <View style={styles.profileSection}>
             <View style={styles.avatarContainer}>
-              <Image source={IMAGES.logo} style={styles.avatar} />
+              <User size={40} color={COLORS.primary} />
             </View>
             <Text style={styles.userName}>
               {user?.displayName || "Citizen User"}
@@ -102,7 +110,8 @@ export default function Sidebar({ visible, onClose }: SidebarProps) {
               {user?.email || "user@email.com"}
             </Text>
             <View style={styles.userBadge}>
-              <Text style={styles.userBadgeText}>🇯🇲 Active Citizen</Text>
+              <Star size={12} color={COLORS.black} style={{ marginRight: 4 }} />
+              <Text style={styles.userBadgeText}>Active Citizen</Text>
             </View>
           </View>
 
@@ -111,38 +120,44 @@ export default function Sidebar({ visible, onClose }: SidebarProps) {
             style={styles.menuContainer}
             showsVerticalScrollIndicator={false}
           >
-            {menuItems.map((item, index) => (
-              <TouchableOpacity
-                key={index}
-                style={styles.menuItem}
-                onPress={() => handleNavigation(item.route)}
-              >
-                <View style={styles.menuItemLeft}>
-                  <View
-                    style={[
-                      styles.iconContainer,
-                      { backgroundColor: item.color + "20" },
-                    ]}
-                  >
-                    <Text style={styles.menuIcon}>{item.icon}</Text>
+            {menuItems.map((item, index) => {
+              const IconComponent = item.icon;
+              return (
+                <TouchableOpacity
+                  key={index}
+                  style={styles.menuItem}
+                  onPress={() => handleNavigation(item.route)}
+                >
+                  <View style={styles.menuItemLeft}>
+                    <View
+                      style={[
+                        styles.iconContainer,
+                        { backgroundColor: item.color + "20" },
+                      ]}
+                    >
+                      <IconComponent 
+                        size={20} 
+                        color={item.color}
+                      />
+                    </View>
+                    <Text style={styles.menuLabel}>{item.label}</Text>
                   </View>
-                  <Text style={styles.menuLabel}>{item.label}</Text>
-                </View>
-                {item.badge && (
-                  <View style={styles.badge}>
-                    <Text style={styles.badgeText}>{item.badge}</Text>
-                  </View>
-                )}
-                <Text style={styles.menuArrow}>›</Text>
-              </TouchableOpacity>
-            ))}
+                  {item.badge && (
+                    <View style={styles.badge}>
+                      <Text style={styles.badgeText}>{item.badge}</Text>
+                    </View>
+                  )}
+                  <Text style={styles.menuArrow}>›</Text>
+                </TouchableOpacity>
+              );
+            })}
 
             {/* Logout */}
             <TouchableOpacity
               style={styles.logoutButton}
               onPress={handleLogout}
             >
-              <Text style={styles.logoutIcon}>🚪</Text>
+              <LogOut size={20} color={COLORS.status.rejected} style={{ marginRight: 12 }} />
               <Text style={styles.logoutText}>Logout</Text>
             </TouchableOpacity>
           </ScrollView>
@@ -151,7 +166,7 @@ export default function Sidebar({ visible, onClose }: SidebarProps) {
           <View style={styles.footer}>
             <Text style={styles.footerText}>Public Eye JA v1.0</Text>
             <Text style={styles.footerSubtext}>
-              Building a Better Jamaica 🇯🇲
+              Building a Better Jamaica
             </Text>
           </View>
         </View>
@@ -195,11 +210,6 @@ const styles = StyleSheet.create({
     borderWidth: 3,
     borderColor: COLORS.secondary,
   },
-  avatar: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-  },
   userName: {
     fontSize: 20,
     fontWeight: "bold",
@@ -217,6 +227,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 6,
     borderRadius: 16,
+    flexDirection: "row",
+    alignItems: "center",
   },
   userBadgeText: {
     fontSize: 12,
@@ -247,9 +259,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     marginRight: 16,
-  },
-  menuIcon: {
-    fontSize: 20,
   },
   menuLabel: {
     fontSize: 16,
@@ -286,10 +295,6 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     borderWidth: 2,
     borderColor: COLORS.status.rejected,
-  },
-  logoutIcon: {
-    fontSize: 20,
-    marginRight: 12,
   },
   logoutText: {
     fontSize: 16,

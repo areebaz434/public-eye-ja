@@ -13,5 +13,6 @@ export const IMAGES = {
   },
   placeholder: {
     pothole: require('../assets/images/pothole.webp'), // This needs require() too!
-  }
+  }, 
+ 
 };
