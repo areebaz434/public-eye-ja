@@ -46,7 +46,7 @@ const Login = () => {
           <img 
             src="/logo.png" 
             alt="Public Eye JM" 
-            className="h-18 w-auto mb-2"
+            className="h-10 w-auto mb-2"
           />
           <img 
             src="/name.png" 
