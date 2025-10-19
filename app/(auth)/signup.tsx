@@ -2,10 +2,12 @@ import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
   Image,
+  Keyboard,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
+  TouchableWithoutFeedback,
   View,
 } from "react-native";
 import { COLORS } from "../../constants/colors";
@@ -36,60 +38,64 @@ export default function SignupScreen() {
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Image source={IMAGES.logo} style={styles.logo} resizeMode="contain" />
-      </View>
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <Image source={IMAGES.icon} style={styles.logo} resizeMode="contain" />
+        </View>
 
-      <View style={styles.content}>
-        <Text style={styles.title}>Sign Up</Text>
-        <Text style={styles.subtitle}>
-          Let's <Text style={styles.bold}>Build</Text> the{" "}
-          <Text style={styles.highlight}>Future</Text> Together
-        </Text>
-
-        <View style={styles.form}>
-          <Text style={styles.label}>Email</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Please enter your email address"
-            value={email}
-            onChangeText={setEmail}
-            keyboardType="email-address"
-            autoCapitalize="none"
-          />
-
-          <Text style={styles.label}>Password</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Please enter your password"
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry
-          />
-
-          <TouchableOpacity
-            style={styles.button}
-            onPress={handleSignup}
-            disabled={loading}
-          >
-            <Text style={styles.buttonText}>
-              {loading ? "Creating account..." : "Sign Up"}
-            </Text>
-          </TouchableOpacity>
-
-          <Text style={styles.loginText}>
-            Already have an account?{" "}
-            <Text
-              style={styles.loginLink}
-              onPress={() => router.push("/(auth)/login")}
-            >
-              Log In
-            </Text>
+        <View style={styles.content}>
+          <Text style={styles.title}>Sign Up</Text>
+          <Text style={styles.subtitle}>
+            Let's <Text style={styles.bold}>Build</Text> the{" "}
+            <Text style={styles.highlight}>Future</Text> Together
           </Text>
+
+          <View style={styles.form}>
+            <Text style={styles.label}>Email</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Please enter your email address"
+              placeholderTextColor={COLORS.gray.medium}
+              value={email}
+              onChangeText={setEmail}
+              keyboardType="email-address"
+              autoCapitalize="none"
+            />
+
+            <Text style={styles.label}>Password</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Please enter your password"
+              placeholderTextColor={COLORS.gray.medium}
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry
+            />
+
+            <TouchableOpacity
+              style={styles.button}
+              onPress={handleSignup}
+              disabled={loading}
+            >
+              <Text style={styles.buttonText}>
+                {loading ? "Creating account..." : "Sign Up"}
+              </Text>
+            </TouchableOpacity>
+
+            <Text style={styles.loginText}>
+              Already have an account?{" "}
+              <Text
+                style={styles.loginLink}
+                onPress={() => router.push("/(auth)/login")}
+              >
+                Log In
+              </Text>
+            </Text>
+          </View>
         </View>
       </View>
-    </View>
+    </TouchableWithoutFeedback>
   );
 }
 
