@@ -27,7 +27,7 @@ const Navbar = ({ onMenuClick }) => {
               <img 
                 src="/logo.png" 
                 alt="Public Eye JA" 
-                className=" h-16 w-12 object-contain"
+                className="h-18 w-1 object-contain"
                 onError={(e) => {
                   // Fallback if logo not found
                   e.target.style.display = 'none';
