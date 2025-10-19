@@ -117,21 +117,7 @@ export default function OnboardingScreen() {
             </Text>
           </TouchableOpacity>
 
-          {/* Dots Indicator */}
-          <View style={styles.dots}>
-            {slides.map((_, index) => (
-              <View
-                key={index}
-                style={[
-                  styles.dot,
-                  index === currentSlide && [
-                    styles.activeDot,
-                    { backgroundColor: slide.dotColor },
-                  ],
-                ]}
-              />
-            ))}
-          </View>
+          
         </Animated.View>
       </View>
     </View>

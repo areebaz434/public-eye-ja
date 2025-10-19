@@ -15,7 +15,9 @@ import { MockAuth } from "../../services/mockAuth";
 import type { Report } from "../../types";
 
 const { width } = Dimensions.get("window");
-const ITEM_SIZE = (width - 48) / 3; // 3 columns
+const GAP = 2;
+const ITEM_WIDTH = (width - GAP * 2) / 3;
+const ITEM_HEIGHT = ITEM_WIDTH * 1.25; // 4:5 aspect ratio like Instagram
 
 const STATUS_COLORS = {
   pending: COLORS.status.pending,
@@ -48,15 +50,18 @@ export default function MyReportsScreen() {
     <TouchableOpacity
       style={styles.gridItem}
       onPress={() => router.push(`/report/${item.id}`)}
+      activeOpacity={0.8}
     >
       <Image source={{ uri: item.imageUrl }} style={styles.gridImage} />
-      <View
-        style={[
-          styles.statusBadge,
-          { backgroundColor: STATUS_COLORS[item.status] },
-        ]}
-      >
-        <Text style={styles.statusText}>{item.status.replace("_", " ")}</Text>
+      <View style={styles.overlay}>
+        <View
+          style={[
+            styles.statusBadge,
+            { backgroundColor: STATUS_COLORS[item.status] },
+          ]}
+        >
+          <Text style={styles.statusText}>{item.status.replace("_", " ")}</Text>
+        </View>
       </View>
     </TouchableOpacity>
   );
@@ -93,6 +98,9 @@ export default function MyReportsScreen() {
         contentContainerStyle={styles.grid}
         refreshing={loading}
         onRefresh={loadMyReports}
+        showsVerticalScrollIndicator={false}
+        columnWrapperStyle={styles.row}
+        ItemSeparatorComponent={() => <View style={{ height: GAP }} />}
       />
     </View>
   );
@@ -120,33 +128,55 @@ const styles = StyleSheet.create({
     opacity: 0.9,
   },
   grid: {
-    padding: 12,
+    padding: 0,
+  },
+  row: {
+    justifyContent: "space-between",
+    marginBottom: GAP,
   },
   gridItem: {
-    width: ITEM_SIZE,
-    height: ITEM_SIZE,
-    margin: 4,
-    borderRadius: 8,
-    overflow: "hidden",
+    width: ITEM_WIDTH,
+    height: ITEM_HEIGHT,
     position: "relative",
+    backgroundColor: COLORS.gray.light,
+    overflow: "hidden",
   },
   gridImage: {
     width: "100%",
     height: "100%",
+    resizeMode: "cover",
+  },
+  overlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: "flex-end",
+    alignItems: "flex-end",
+    padding: 12,
   },
   statusBadge: {
-    position: "absolute",
-    bottom: 8,
-    right: 8,
     paddingHorizontal: 8,
     paddingVertical: 4,
-    borderRadius: 8,
+    borderRadius: 12,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.4,
+    shadowRadius: 4,
+    elevation: 4,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.3)",
   },
   statusText: {
     color: COLORS.white,
     fontSize: 10,
-    fontWeight: "600",
-    textTransform: "capitalize",
+    fontWeight: "800",
+    textTransform: "uppercase",
+    letterSpacing: 0.8,
+    textShadowColor: "rgba(0, 0, 0, 0.5)",
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
   },
   empty: {
     flex: 1,

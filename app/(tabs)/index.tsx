@@ -1,6 +1,6 @@
 import * as Location from "expo-location";
 import { useRouter } from "expo-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   ScrollView,
@@ -9,7 +9,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
+import MapView, { Marker, PROVIDER_GOOGLE, Region } from "react-native-maps";
 import { COLORS } from "../../constants/colors";
 import { MockReportsService } from "../../services/mockApi";
 import type { Report, ReportCategory } from "../../types";
@@ -36,6 +36,22 @@ const CATEGORIES = [
   },
 ];
 
+// Jamaica's strict boundaries - no other countries visible
+const JAMAICA_REGION: Region = {
+  latitude: 18.0179,
+  longitude: -76.8099,
+  latitudeDelta: 0.8, // Tight focus on Jamaica only
+  longitudeDelta: 0.6,
+};
+
+// Maximum zoom out region - very restrictive to keep Jamaica only
+const MAX_REGION: Region = {
+  latitude: 18.0179,
+  longitude: -76.8099,
+  latitudeDelta: 1.0, // Very limited zoom out
+  longitudeDelta: 0.8,
+};
+
 export default function MapScreen() {
   const [location, setLocation] = useState<Location.LocationObject | null>(
     null
@@ -44,6 +60,7 @@ export default function MapScreen() {
   const [filteredReports, setFilteredReports] = useState<Report[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const mapRef = useRef<MapView>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -85,6 +102,20 @@ export default function MapScreen() {
     router.push("/report/create");
   };
 
+  const handleRegionChangeComplete = (region: Region) => {
+    // Strictly prevent zooming out beyond Jamaica - no other countries visible
+    if (
+      region.latitudeDelta > MAX_REGION.latitudeDelta ||
+      region.longitudeDelta > MAX_REGION.longitudeDelta ||
+      region.latitude < 17.5 || // Prevent panning north to Cuba
+      region.latitude > 18.7 || // Prevent panning south
+      region.longitude < -78.5 || // Prevent panning west
+      region.longitude > -76.0   // Prevent panning east
+    ) {
+      mapRef.current?.animateToRegion(MAX_REGION, 500);
+    }
+  };
+
   if (loading || !location) {
     return (
       <View style={styles.loading}>
@@ -96,15 +127,18 @@ export default function MapScreen() {
   return (
     <View style={styles.container}>
       <MapView
+        ref={mapRef}
         provider={PROVIDER_GOOGLE}
         style={styles.map}
-        initialRegion={{
-          latitude: 18.0179,
-          longitude: -76.8099,
-          latitudeDelta: 0.15,
-          longitudeDelta: 0.15,
-        }}
+        initialRegion={JAMAICA_REGION}
+        onRegionChangeComplete={handleRegionChangeComplete}
+        minZoomLevel={10} // Higher minimum zoom to prevent seeing other countries
+        maxZoomLevel={18} // Allow reasonable zoom in
         showsUserLocation
+        scrollEnabled={true}
+        zoomEnabled={true}
+        pitchEnabled={false}
+        rotateEnabled={false}
       >
         {filteredReports.map((report) => (
           <Marker
